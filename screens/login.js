@@ -1,61 +1,55 @@
-// Import necessary modules
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, SafeAreaView } from 'react-native';
 import tw from 'twrnc';
 
-const LoginScreen = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+const Login = () => {
+  const [input, setInput] = useState('');
+  const [result, setResult] = useState('');
 
-  const handleLogin = async () => {
-    try {
-      const response = await fetch('http://localhost:3000/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: email,
-          password: password,
-        }),
-      });
-
-      const json = await response.json();
-      if (response.status === 200) {
-        Alert.alert("Success", "Logged in successfully");
-        // Handle successful login here
-      } else {
-        Alert.alert("Login Failed", json.message);
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      Alert.alert("Error", "An error occurred during login");
+  const handleInput = (buttonPressed) => {
+    if (buttonPressed === '=' && input) {
+      calculateResult();
+      return;
     }
+    setInput((prevInput) => (prevInput + buttonPressed));
+  };
+
+  const calculateResult = () => {
+    let answer = input;
+    try {
+      answer = eval(input);
+    } catch (error) {
+      answer = 'Error';
+    }
+    setResult(answer);
+  };
+
+  const clearInput = () => {
+    setInput('');
+    setResult('');
   };
 
   return (
-    <View style={tw`flex-1 items-center justify-center bg-gray-200`}>
-      <TextInput
-        style={tw`border border-gray-400 w-80 p-2 mb-4`}
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-      />
-      <TextInput
-        style={tw`border border-gray-400 w-80 p-2 mb-4`}
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
-      <TouchableOpacity
-        style={tw`bg-blue-500 w-80 p-3 items-center`}
-        onPress={handleLogin}
-      >
-        <Text style={tw`text-white font-bold`}>Login</Text>
-      </TouchableOpacity>
-    </View>
+    <SafeAreaView style={tw`flex-1 justify-center items-center bg-blue-600 w-full`}>
+      <View style={tw`bg-white w-80 rounded-xl`}>
+        <View style={tw`p-4`}>
+          <Text style={tw`text-2xl text-right`}>{input || '0'}</Text>
+          <Text style={tw`text-lg text-gray-500 text-right mt-2`}>{result}</Text>
+        </View>
+        <View style={tw`flex-wrap flex-row`}>
+          {['7', '8', '9', '/', '4', '5', '6', '*', '1', '2', '3', '-', '0', '.', '=', '+', 'C'].map((button) => (
+            <TouchableOpacity
+              key={button}
+              style={tw`w-1/4 items-center p-4 border`}
+              onPress={() => button === 'C' ? clearInput() : handleInput(button)}
+            >
+              <Text style={tw`text-lg`}>{button}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+    </SafeAreaView>
   );
 };
 
-export default LoginScreen;
+export default Login;
